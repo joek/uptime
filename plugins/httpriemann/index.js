@@ -1,18 +1,18 @@
 /**
  * Http-Riemann plugin for the uptime project - https://github.com/fzaninotto/uptime
  * *
- * This index.js file goes to a directory `plugins/http-riemann` in your installation of uptime.
+ * This index.js file goes to a directory `plugins/httpriemann` in your installation of uptime.
  *
- * Notifies all events (up, down) to Riemann through http-riemann gateway.
+ * Notifies all events (up, down) to Riemann through httpriemann gateway.
  *
  * To enable the plugin, add the following line to the plugins section of your config default.yml file
  * plugins:
- *  - ./plugins/http-riemann
+ *  - ./plugins/httpriemann
  *
  * Example configuration:
  *
- *   http-riemann:
- *     endpoint: https://<user>:<password>@<http-riemann host>/
+ *   httpriemann:
+ *     endpoint: https://<user>:<password>@<httpriemann host>/
  *
  */
 var CheckEvent = require('../../models/checkEvent');
@@ -25,9 +25,9 @@ var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 
 exports.initWebApp = function(options) {
 
-  var config = options.config.statuspage;
-  log.console(config.username)
-  log.console(config.password)
+  var config = options.config.httpriemann;
+  console.log(config.username)
+  console.log(config.password)
   var BasicAuth = spore.middlewares.basic(config.username, config.password)
   var status = spore.createClient(BasicAuth, {
     "base_url" : config.endpoint,
@@ -63,14 +63,14 @@ exports.initWebApp = function(options) {
     }
     //we should react only on up and down message, and only if check has a status id provided
     var riemannServiceId = check.getPollerParam('riemannServiceId');
-    if (checkEvent.message=="up" || checkEvent.message=="down" && statusId){
+    if (checkEvent.message=="up" || checkEvent.message=="down" && riemannServiceId){
       var statusChange = componentStatusHandler[checkEvent.message](check, checkEvent);
       // Send Status
       console.log('Send Riemann alert');
       var payload = '{';
-        payload += '"host": "web3", "service": "uptime",';
+        payload += '"host": "' + riemannServiceId + '", "service": "uptime",';
         payload += '"state": "' + statusChange + '",';
-        payload += '"description": "UPTIME: Service offline",}';
+        payload += '"description": "UPTIME: Service offline"}';
       status.sendEvent(payload, function(err, result) {
         if(result != null && result.status == "200") {
           console.log('Riemann: service status changed');

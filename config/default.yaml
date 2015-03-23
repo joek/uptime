@@ -1,17 +1,17 @@
-url: 'http://localhost:80'
+url: 'http://localhost:8082'
 
 mongodb:
-  server: REPLACE_WITH_MONGO_ENDPOINT
-  database: REPLACE_WITH_MONGO_DATABASE
-  user: "REPLACE_WITH_MONGO_USER"
-  password: "REPLACE_WITH_MONGO_PWD"
+  server: localhost
+  database: uptime
+  user: uptime
+  password: bre9zel
   connectionString:       # alternative to setting server, database, user and password separately
 
 monitor:
   name:                   origin
-  apiUrl:                 'http://localhost:80/api' # must be accessible without a proxy
+  apiUrl:                 'http://localhost:8082/api' # must be accessible without a proxy
   pollingInterval:        10000      # ten seconds
-  timeout:                REPLACE_WITH_MONITOR_TIMEOUT       # five seconds
+  timeout:                6000        # five seconds
   userAgent:              NodeUptime/3.0 (https://github.com/fzaninotto/uptime)
 
 analyzer:
@@ -25,24 +25,17 @@ plugins:
   - ./plugins/console
   - ./plugins/patternMatcher
   - ./plugins/httpOptions
-  - ./plugins/httpsOAuthOptions
-  - ./plugins/hipchat
-  - ./plugins/victorops
+#  - ./plugins/httpsOAuthOptions
+#  - ./plugins/hipchat
+#  - ./plugins/victorops
 #  - ./plugins/statushub
   - ./plugins/statuspage
+  - ./plugins/httpriemann
 
-hipchat:
-  apiKey: "REPLACE_WITH_HIPCHAT_APIKEY" # HipChat Admin API Key https://www.hipchat.com/admin/api
-  tag:
-    hipchat: REPLACE_WITH_HIPCHAT_ROOM  # tag name : HipChat room ID where send notification
-
-victorops:
-  endpoint: "REPLACE_WITH_VICTOROPS_ENDPOINT"
-
-#statushub:
-#  endpoint: https://statushub.io/api/status_pages #the same for all
-#  subdomains: REPLACE_WITH_STATUSHUB_SUBDOMAINS # for example ["my_stuff"] as you can have a number of different status pages
-#  apiKey: REPLACE_WITH_STATUSHUB_APIKEY
+httpriemann:
+  endpoint: http://localhost:4567
+  username: uptime
+  password: bre9zel
 
 statuspage:
   endpoint: https://api.statuspage.io/v1/pages
