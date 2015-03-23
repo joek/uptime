@@ -26,10 +26,10 @@ var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 exports.initWebApp = function(options) {
 
   var config = options.config.statuspage;
-  var status = spore.createClient({
+  var status = spore.middlewares.basic(config.username, config.password).createClient({
     "base_url" : config.endpoint,
     "methods" : {
-      "event" : {
+      "sendEvent" : {
         "path" : "/",
         "method" : "POST",
       }
@@ -52,29 +52,32 @@ exports.initWebApp = function(options) {
 		checkEvent.findCheck(function (err, check) {
       componentStatusHandler = {
         down: function(check, checkEvent) {
-          return "component[status]=major_outage"
+          return "error"
         },
         up: function(check, checkEvent) {
-          return "component[status]="
+          return "ok"
       }
     }
     //we should react only on up and down message, and only if check has a status id provided
-    var statusId = check.getPollerParam('statusPageId');
+    var riemannServiceId = check.getPollerParam('riemannServiceId');
     if (checkEvent.message=="up" || checkEvent.message=="down" && statusId){
       var statusChange = componentStatusHandler[checkEvent.message](check, checkEvent);
-      status.availability({
-          serviceId: statusId
-      }, statusChange,
-      function(err, result) {
+      // Send Status
+      console.log('Send Riemann alert');
+      var payload = '{';
+        payload += '"host": "web3", "service": "uptime",';
+        payload += '"state": "' + statusChange + '",';
+        payload += '"description": "UPTIME: Service offline",}';
+      status.sendEvent(payload, function(err, result) {
         if(result != null && result.status == "200") {
-          console.log('StatusPage: service status changed');
+          console.log('Riemann: service status changed');
         } else {
-          console.error('StatusPage: error changing service status. \nResponse: ' + JSON.stringify(result));
+          console.error('Riemann: error sending riemann message. \nResponse: ' + JSON.stringify(result));
         }
       });
     }
 		});
 	});
 
-	console.log('Enabled StatusPage notifications');
+	console.log('Enabled Riemann notifications');
 };
