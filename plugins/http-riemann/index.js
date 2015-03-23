@@ -26,6 +26,8 @@ var template = fs.readFileSync(__dirname + '/views/_detailsEdit.ejs', 'utf8');
 exports.initWebApp = function(options) {
 
   var config = options.config.statuspage;
+  log.console(config.username)
+  log.console(config.password)
   var BasicAuth = spore.middlewares.basic(config.username, config.password)
   var status = spore.createClient(BasicAuth, {
     "base_url" : config.endpoint,
